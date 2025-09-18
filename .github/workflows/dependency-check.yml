@@ -1,10 +1,7 @@
 name: PyImportSync Check
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
   dependency-check:

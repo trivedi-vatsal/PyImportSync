@@ -29,9 +29,41 @@ A versatile tool that automatically checks if all Python imports in your codebas
 ```yaml
 repos:
   - repo: https://github.com/trivedi-vatsal/PyImportSync
-    rev: main
+    rev: v1.0.0
     hooks:
       - id: check-python-dependencies
+```
+
+### Direct Installation & Usage
+
+Install PyImportSync from GitHub and use it in any project:
+
+```bash
+# Install directly from GitHub
+pip install git+https://github.com/trivedi-vatsal/PyImportSync.git
+
+# Run in any project directory
+python -m pyimportsync
+
+# With custom arguments
+python -m pyimportsync --project-root . --requirements-file requirements.txt --verbose
+
+# Check specific project with output file
+python -m pyimportsync --project-root /path/to/project --output missing-deps.txt
+
+# Or use the console script
+pyimportsync --project-root . --verbose
+```
+
+### Development Usage
+
+Run directly from the source code (for development):
+
+```bash
+# Clone and run from source
+git clone https://github.com/trivedi-vatsal/PyImportSync.git
+cd PyImportSync/src
+python -m pyimportsync
 ```
 
 ### Direct Installation (One-liner)
