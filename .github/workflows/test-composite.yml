@@ -1,0 +1,19 @@
+name: Test Composite Action (Fast)
+
+on:
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  test-composite-action:
+    name: Test Fast Composite Action
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Python Dependencies (Composite)
+        uses: ./action-composite.yml
+        with:
+          project-path: '.'
+          fail-on-missing: true

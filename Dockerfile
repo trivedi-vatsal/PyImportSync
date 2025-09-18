@@ -4,10 +4,13 @@ FROM python:3.11-slim
 LABEL maintainer="trivedi-vatsal"
 LABEL description="GitHub Action for synchronizing Python imports with requirements.txt"
 
-# Install system dependencies
+# Install system dependencies and UV in a single layer
 RUN apt-get update && apt-get install -y \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && mv /root/.cargo/bin/uv /usr/local/bin/uv
 
 # Set working directory
 WORKDIR /action
@@ -15,11 +18,11 @@ WORKDIR /action
 # Copy requirements first for better caching
 COPY requirements.txt /action/
 
-# Install Python dependencies
-RUN pip install --no-cache-dir \
+# Install Python dependencies using UV (much faster than pip)
+RUN uv pip install --system --no-cache \
     pipreqs==0.4.13 \
     packaging \
-    && pip install --no-cache-dir -r /action/requirements.txt
+    && uv pip install --system --no-cache -r /action/requirements.txt
 
 # Copy the action files
 COPY src/ /action/src/

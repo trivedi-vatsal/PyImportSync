@@ -1,0 +1,75 @@
+name: 'PyImportSync - Fast Composite Action'
+description: 'Fast version of PyImportSync using composite action instead of Docker'
+author: 'trivedi-vatsal'
+
+inputs:
+  project-path:
+    description: 'Path to the project directory'
+    required: false
+    default: '.'
+  requirements-file:
+    description: 'Path to requirements.txt file'
+    required: false
+    default: 'requirements.txt'
+  fail-on-missing:
+    description: 'Fail the action if missing dependencies are found'
+    required: false
+    default: 'true'
+  use-pipreqs:
+    description: 'Enable pipreqs for dependency detection'
+    required: false
+    default: 'true'
+  respect-gitignore:
+    description: 'Respect .gitignore patterns'
+    required: false
+    default: 'true'
+  ignore-dirs:
+    description: 'Comma-separated list of directories to ignore'
+    required: false
+    default: ''
+  output-file:
+    description: 'File to write missing dependencies to'
+    required: false
+    default: ''
+
+outputs:
+  missing-count:
+    description: 'Number of missing dependencies'
+    value: ${{ steps.check-deps.outputs.missing-count }}
+  missing-dependencies:
+    description: 'List of missing dependencies'
+    value: ${{ steps.check-deps.outputs.missing-dependencies }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install UV
+      shell: bash
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        uv pip install --system pipreqs==0.4.13 packaging pathspec rich
+
+    - name: Run dependency check
+      id: check-deps
+      shell: bash
+      working-directory: ${{ inputs.project-path }}
+      run: |
+        python ${{ github.action_path }}/src/check_dependencies.py \
+          --project-root . \
+          --requirements-file ${{ inputs.requirements-file }} \
+          --ignore-dirs "${{ inputs.ignore-dirs }}" \
+          --output "${{ inputs.output-file }}" \
+          ${{ inputs.use-pipreqs == 'true' && '' || '--no-pipreqs' }} \
+          ${{ inputs.respect-gitignore == 'true' && '' || '--no-gitignore' }} \
+          ${{ inputs.fail-on-missing == 'true' && '' || '' }}
