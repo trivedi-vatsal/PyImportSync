@@ -8,11 +8,11 @@ with regex fallback for malformed files.
 import ast
 import re
 from pathlib import Path
-from typing import Set
+from typing import Set, List
 
 from .cache import FileCache
 from .gitignore import GitignoreHandler
-from .utils import get_dynamic_stdlib_modules, is_local_module
+from .utils import get_dynamic_stdlib_modules, is_local_module, should_skip_import
 
 
 class ImportScanner:
@@ -24,12 +24,14 @@ class ImportScanner:
         ignore_dirs: Set[str],
         cache: FileCache,
         gitignore_handler: GitignoreHandler,
+        skip_imports: List[str] = None,
     ):
         """Initialize import scanner."""
         self.project_root = project_root
         self.ignore_dirs = ignore_dirs
         self.cache = cache
         self.gitignore_handler = gitignore_handler
+        self.skip_imports = skip_imports or []
         self.stdlib_modules = get_dynamic_stdlib_modules()
 
     def find_imports_in_code(self) -> Set[str]:
@@ -136,6 +138,10 @@ class ImportScanner:
 
             # Skip local modules
             if is_local_module(imp, self.project_root):
+                continue
+
+            # Skip imports specified in configuration
+            if should_skip_import(imp, self.skip_imports):
                 continue
 
             # Skip common built-ins that might not be in stdlib list

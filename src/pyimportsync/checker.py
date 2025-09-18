@@ -56,6 +56,7 @@ class DependencyChecker:
             ignore_dirs=set(self.config["ignore_dirs"]),
             cache=self.cache,
             gitignore_handler=self.gitignore_handler,
+            skip_imports=self.config.get("skip_imports", []),
         )
 
         self.analyzer = DependencyAnalyzer(

@@ -1,0 +1,34 @@
+{
+  "_comment": "General PyImportSync configuration template",
+  "_documentation": "https://github.com/trivedi-vatsal/PyImportSync/blob/main/docs/configuration.md",
+  
+  "ignore_dirs": [
+    "__pycache__",
+    ".git", 
+    ".venv",
+    "venv",
+    "env",
+    "tests",
+    "docs",
+    "examples", 
+    "build",
+    "dist",
+    "node_modules",
+    ".pytest_cache"
+  ],
+  
+  "requirements_file": "requirements.txt",
+  "enable_cache": true,
+  "use_pathspec": true,
+  
+  "_skip_imports_explanation": "List import names that should be ignored (internal modules, app names, etc.)",
+  "_skip_imports_examples": {
+    "django_projects": ["users", "blog", "accounts", "core", "api", "models", "views", "utils", "forms"],
+    "flask_projects": ["blueprints", "models", "views", "utils", "forms", "auth"],
+    "general_projects": ["config", "utils", "helpers", "constants", "exceptions"]
+  },
+  
+  "skip_imports": [
+    "_comment_add_your_internal_modules_here"
+  ]
+}

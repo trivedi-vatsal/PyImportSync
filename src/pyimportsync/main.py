@@ -4,10 +4,11 @@ Main entry point for PyImportSync when used as a module.
 """
 import argparse
 import sys
+import json
 from pathlib import Path
 
 from .checker import DependencyChecker
-from .utils import load_config
+from .utils import load_config, create_config_template
 
 
 def run():
@@ -45,7 +46,14 @@ def run():
     parser.add_argument(
         "--output", default="", help="Output file to save missing dependencies"
     )
+    parser.add_argument(
+        "--init-config", action="store_true", help="Create a pyimportsync-config.json template file"
+    )
     args = parser.parse_args()
+
+    # Handle --init-config flag
+    if args.init_config:
+        return create_config_template()
 
     # Prepare config overrides
     config_overrides = {}

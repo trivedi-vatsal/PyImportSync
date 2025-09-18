@@ -66,7 +66,7 @@ class DependencyAnalyzer:
 
             # Parse pipreqs output
             packages = []
-            for line in result.stdout.strip().split("\\n"):
+            for line in result.stdout.strip().split("\n"):
                 if line and not line.startswith("#"):
                     packages.append(line)
 
