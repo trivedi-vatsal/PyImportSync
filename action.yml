@@ -1,0 +1,57 @@
+name: 'PyImportSync'
+description: 'Synchronize Python imports with requirements.txt - ensure all imports are properly declared'
+author: 'trivedi-vatsal'
+
+branding:
+  icon: 'package'
+  color: 'blue'
+
+inputs:
+  project-path:
+    description: 'Path to the Python project directory (relative to repository root)'
+    required: false
+    default: '.'
+  requirements-file:
+    description: 'Path to requirements.txt file (relative to project-path)'
+    required: false
+    default: 'requirements.txt'
+  ignore-dirs:
+    description: 'Comma-separated list of directories to ignore (in addition to defaults)'
+    required: false
+    default: ''
+  fail-on-missing:
+    description: 'Whether to fail the action if missing dependencies are found'
+    required: false
+    default: 'true'
+  output-file:
+    description: 'Output file to save missing dependencies (optional)'
+    required: false
+    default: ''
+  use-pipreqs:
+    description: 'Whether to use pipreqs for additional dependency detection'
+    required: false
+    default: 'true'
+  respect-gitignore:
+    description: 'Whether to respect .gitignore patterns when scanning files'
+    required: false
+    default: 'true'
+
+outputs:
+  missing-dependencies:
+    description: 'List of missing dependencies (newline-separated)'
+  missing-count:
+    description: 'Number of missing dependencies found'
+  status:
+    description: 'Status of the check (success, missing-deps, error)'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.project-path }}
+    - ${{ inputs.requirements-file }}
+    - ${{ inputs.ignore-dirs }}
+    - ${{ inputs.fail-on-missing }}
+    - ${{ inputs.output-file }}
+    - ${{ inputs.use-pipreqs }}
+    - ${{ inputs.respect-gitignore }}

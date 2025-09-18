@@ -1,0 +1,8 @@
+# PyImportSync Dependencies
+# Optional dependencies for enhanced features:
+
+# Enhanced .gitignore parsing
+pathspec>=0.11.0
+
+# Enhanced output formatting 
+rich>=13.0.0

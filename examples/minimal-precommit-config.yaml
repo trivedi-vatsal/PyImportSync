@@ -1,0 +1,6 @@
+# Minimal pre-commit configuration
+repos:
+  - repo: https://github.com/trivedi-vatsal/PyImportSync
+    rev: main
+    hooks:
+      - id: check-python-dependencies

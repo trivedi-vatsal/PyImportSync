@@ -1,0 +1,45 @@
+# Example .pre-commit-config.yaml for using the dependency checker
+# Projects can copy this file or reference the hooks directly
+
+repos:
+  - repo: https://github.com/trivedi-vatsal/PyImportSync  # Replace with your repo URL
+    rev: main  # Use a specific tag/version in production
+    hooks:
+      - id: check-python-dependencies
+        name: Check Python Dependencies
+        description: Verify all imports are in requirements.txt
+        entry: python src/check_dependencies.py
+        language: python
+        files: \.py$
+        require_serial: false
+        additional_dependencies: []
+        args: ['--quiet']  # Only show missing dependencies
+        
+      - id: check-python-dependencies-verbose
+        name: Check Python Dependencies (Verbose)
+        description: Detailed dependency analysis with full report
+        entry: python src/check_dependencies.py
+        language: python
+        files: \.py$
+        require_serial: false
+        additional_dependencies: []
+        # No --quiet flag for verbose output
+
+  # Optional: Include other useful pre-commit hooks
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: ['--max-line-length=88', '--extend-ignore=E203,W503']

@@ -1,0 +1,73 @@
+name: PyImportSync Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  dependency-check:
+    name: Check Python Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check Python Dependencies
+      id: dep-check
+      uses: ./
+      with:
+        project-path: '.'
+        requirements-file: 'requirements.txt'
+        fail-on-missing: true
+        use-pipreqs: true
+        
+    - name: Upload missing dependencies (if any)
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: missing-dependencies
+        path: missing-deps.txt
+        retention-days: 30
+        
+    - name: Comment on PR with results
+      if: github.event_name == 'pull_request' && steps.dep-check.outputs.missing-count > 0
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const missingDeps = `${{ steps.dep-check.outputs.missing-dependencies }}`.split('\n').filter(dep => dep.trim() !== '');
+          const count = ${{ steps.dep-check.outputs.missing-count }};
+          
+          const body = `## 🔍 Python Dependency Check Results
+          
+          ❌ **${count} missing dependencies detected:**
+          
+          ${missingDeps.map(dep => `- \`${dep}\``).join('\n')}
+          
+          Please add these packages to your \`requirements.txt\` file.
+          
+          <details>
+          <summary>How to fix this</summary>
+          
+          1. Add the missing packages to your \`requirements.txt\` file:
+             \`\`\`
+             ${missingDeps.join('\n')}
+             \`\`\`
+          
+          2. Install the packages locally to test:
+             \`\`\`bash
+             pip install ${missingDeps.join(' ')}
+             \`\`\`
+          
+          3. Commit and push the updated \`requirements.txt\`
+          
+          </details>`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
