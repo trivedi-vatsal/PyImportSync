@@ -65,7 +65,7 @@ runs:
       shell: bash
       working-directory: ${{ inputs.project-path }}
       run: |
-        python ${{ github.action_path }}/src/check_dependencies.py \
+        python ${{ github.action_path }}/../src/check_dependencies.py \
           --project-root . \
           --requirements-file ${{ inputs.requirements-file }} \
           --ignore-dirs "${{ inputs.ignore-dirs }}" \
