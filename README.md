@@ -14,7 +14,7 @@ A versatile tool that automatically checks if all Python imports in your codebas
 
 ## Quick Start
 
-### GitHub Action
+### GitHub Action (⚡ Fast Composite Action)
 
 ```yaml
 - name: Check Python Dependencies
@@ -23,6 +23,13 @@ A versatile tool that automatically checks if all Python imports in your codebas
     project-path: '.'
     fail-on-missing: true
 ```
+
+**🚀 Performance Features:**
+
+- **Ultra-fast execution** - No Docker build required
+- **UV package manager** - 10-100x faster than pip
+- **Python caching** - Leverages GitHub Actions cache
+- **Minimal dependencies** - Only installs what's needed
 
 ### Pre-commit Hook
 

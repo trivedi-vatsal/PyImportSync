@@ -1,21 +1,19 @@
-name: Test Local Action
+name: Test Fast Action
 
 on:
   workflow_dispatch: # Allow manual trigger
 
 jobs:
-  test-local-action:
-    name: Test Local PyImportSync Action
+  test-fast-action:
+    name: Test Fast PyImportSync Action
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check Python Dependencies (Local)
+      - name: Check Python Dependencies (Fast Composite)
         uses: ./
         with:
-          project-path: "."
-          requirements-file: "requirements.txt"
+          project-path: '.'
           fail-on-missing: true
-          use-pipreqs: true
