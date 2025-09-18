@@ -66,18 +66,6 @@ cd PyImportSync/src
 python -m pyimportsync
 ```
 
-### Direct Installation (One-liner)
-
-Quick setup with automatic pre-commit configuration:
-
-```bash
-# Using Python (cross-platform)
-python -c "import urllib.request; exec(urllib.request.urlopen('https://raw.githubusercontent.com/trivedi-vatsal/PyImportSync/main/scripts/install_dep_check.py').read())"
-
-# Using curl (Unix/Linux/macOS)
-curl -sSL https://raw.githubusercontent.com/trivedi-vatsal/PyImportSync/main/scripts/install_dep_check.sh | bash
-```
-
 ## Documentation
 
 - 📚 [Quick Start Guide](docs/quick-start.md) - Installation and basic setup

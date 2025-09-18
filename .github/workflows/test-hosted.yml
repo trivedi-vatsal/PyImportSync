@@ -1,0 +1,19 @@
+name: Test Hosted Action
+
+on:
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  test-hosted-action:
+    name: Test Hosted PyImportSync Action
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Python Dependencies (Hosted)
+        uses: trivedi-vatsal/PyImportSync@v0.0.1
+        with:
+          project-path: '.'
+          fail-on-missing: true
