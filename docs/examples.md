@@ -3,6 +3,7 @@
 ## As a GitHub Action
 
 ### .github/workflows/dependency-check.yml
+
 ```yaml
 name: Dependency Check
 on: [push, pull_request]
@@ -21,6 +22,7 @@ jobs:
 ## As a Pre-commit Hook
 
 ### .pre-commit-config.yaml (Minimal)
+
 ```yaml
 repos:
   - repo: https://github.com/trivedi-vatsal/PyImportSync
@@ -30,6 +32,7 @@ repos:
 ```
 
 ### .pre-commit-config.yaml (Complete Example)
+
 ```yaml
 repos:
   # Python dependency checking
@@ -64,6 +67,7 @@ repos:
 ## Local Usage
 
 ### Command Line
+
 ```bash
 # Basic check
 python src/check_dependencies.py
@@ -79,6 +83,7 @@ python src/check_dependencies.py --output missing-deps.txt --quiet
 ```
 
 ### As a Git Hook (without pre-commit)
+
 ```bash
 # Copy the dependency checker to your .git/hooks/ directory
 cp check_dependencies.py .git/hooks/pre-commit

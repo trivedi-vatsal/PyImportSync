@@ -27,7 +27,7 @@ class TestDependencyChecker(unittest.TestCase):
         """Test DependencyChecker initialization."""
         checker = DependencyChecker(self.temp_dir)
         self.assertEqual(checker.project_root, self.project_path)
-        self.assertTrue(isinstance(checker.config['ignore_dirs'], list))
+        self.assertTrue(isinstance(checker.config["ignore_dirs"], list))
 
     def test_gitignore_loading(self):
         """Test .gitignore pattern loading."""

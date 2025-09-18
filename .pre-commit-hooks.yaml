@@ -6,7 +6,7 @@
   files: \.py$
   require_serial: false
   additional_dependencies: []
-  args: ['--quiet']
+  args: ["--quiet"]
 
 - id: check-python-dependencies-verbose
   name: Check Python Dependencies (Verbose)
@@ -25,4 +25,4 @@
   files: \.py$
   require_serial: true
   additional_dependencies: []
-  args: ['--quiet']
+  args: ["--quiet"]

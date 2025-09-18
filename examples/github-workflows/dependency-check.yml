@@ -1,27 +1,27 @@
 name: Check Python Dependencies
-on: 
+on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   dependency-check:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-        
-    - name: Check Python Dependencies
-      uses: trivedi-vatsal/PyImportSync@v1
-      with:
-        project-path: '.'
-        requirements-file: 'requirements.txt'
-        fail-on-missing: true
-        respect-gitignore: true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Check Python Dependencies
+        uses: trivedi-vatsal/PyImportSync@v1
+        with:
+          project-path: "."
+          requirements-file: "requirements.txt"
+          fail-on-missing: true
+          respect-gitignore: true

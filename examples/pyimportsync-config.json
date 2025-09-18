@@ -2,10 +2,9 @@
   "_comment": "Example configuration file for PyImportSync",
   "_usage": "Specify with --config-file path/to/config.json",
   "_note": "PyImportSync now uses dynamic standard library detection automatically",
-  
   "ignore_dirs": [
     "__pycache__",
-    ".git", 
+    ".git",
     ".venv",
     "venv",
     "env",
@@ -19,7 +18,6 @@
     "examples",
     "migrations"
   ],
-  
   "requirements_file": "requirements.txt",
   "enable_cache": true,
   "cache_file": ".pyimportsync_cache.json",

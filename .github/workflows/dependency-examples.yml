@@ -3,7 +3,7 @@ name: Advanced PyImportSync Examples
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+    - cron: "0 2 * * 1" # Weekly on Monday at 2 AM
 
 jobs:
   # Example 1: Multiple Python projects in subdirectories
@@ -17,7 +17,7 @@ jobs:
             path: "backend/api"
             requirements: "requirements.txt"
           - name: "Data Pipeline"
-            path: "backend/pipeline" 
+            path: "backend/pipeline"
             requirements: "requirements.txt"
           - name: "ML Models"
             path: "ml"
@@ -25,69 +25,69 @@ jobs:
           - name: "Scripts"
             path: "scripts"
             requirements: "requirements-scripts.txt"
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Check Dependencies for ${{ matrix.project.name }}
-      uses: ./
-      with:
-        project-path: ${{ matrix.project.path }}
-        requirements-file: ${{ matrix.project.requirements }}
-        ignore-dirs: 'tests,docs,__pycache__'
-        fail-on-missing: false
-        output-file: 'missing-deps-${{ matrix.project.name }}.txt'
-        
-    - name: Upload results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: dependency-results-${{ matrix.project.name }}
-        path: missing-deps-*.txt
+      - uses: actions/checkout@v4
+
+      - name: Check Dependencies for ${{ matrix.project.name }}
+        uses: ./
+        with:
+          project-path: ${{ matrix.project.path }}
+          requirements-file: ${{ matrix.project.requirements }}
+          ignore-dirs: "tests,docs,__pycache__"
+          fail-on-missing: false
+          output-file: "missing-deps-${{ matrix.project.name }}.txt"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-results-${{ matrix.project.name }}
+          path: missing-deps-*.txt
 
   # Example 2: Non-blocking check with detailed reporting
   audit-dependencies:
     name: Dependency Audit (Non-blocking)
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Audit Python Dependencies
-      id: audit
-      uses: ./
-      with:
-        project-path: '.'
-        fail-on-missing: false
-        use-pipreqs: true
-        output-file: 'dependency-audit.txt'
-        
-    - name: Generate Dependency Report
-      run: |
-        echo "# Dependency Audit Report" > dependency-report.md
-        echo "Generated on: $(date)" >> dependency-report.md
-        echo "" >> dependency-report.md
-        echo "## Status: ${{ steps.audit.outputs.status }}" >> dependency-report.md
-        echo "## Missing Dependencies: ${{ steps.audit.outputs.missing-count }}" >> dependency-report.md
-        echo "" >> dependency-report.md
-        
-        if [ "${{ steps.audit.outputs.missing-count }}" -gt "0" ]; then
-          echo "### Missing Dependencies:" >> dependency-report.md
-          echo '```' >> dependency-report.md
-          echo "${{ steps.audit.outputs.missing-dependencies }}" >> dependency-report.md
-          echo '```' >> dependency-report.md
-        else
-          echo "✅ All dependencies are properly declared!" >> dependency-report.md
-        fi
-        
-    - name: Upload Audit Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: dependency-audit-report
-        path: |
-          dependency-report.md
-          dependency-audit.txt
-        retention-days: 90
+      - uses: actions/checkout@v4
+
+      - name: Audit Python Dependencies
+        id: audit
+        uses: ./
+        with:
+          project-path: "."
+          fail-on-missing: false
+          use-pipreqs: true
+          output-file: "dependency-audit.txt"
+
+      - name: Generate Dependency Report
+        run: |
+          echo "# Dependency Audit Report" > dependency-report.md
+          echo "Generated on: $(date)" >> dependency-report.md
+          echo "" >> dependency-report.md
+          echo "## Status: ${{ steps.audit.outputs.status }}" >> dependency-report.md
+          echo "## Missing Dependencies: ${{ steps.audit.outputs.missing-count }}" >> dependency-report.md
+          echo "" >> dependency-report.md
+
+          if [ "${{ steps.audit.outputs.missing-count }}" -gt "0" ]; then
+            echo "### Missing Dependencies:" >> dependency-report.md
+            echo '```' >> dependency-report.md
+            echo "${{ steps.audit.outputs.missing-dependencies }}" >> dependency-report.md
+            echo '```' >> dependency-report.md
+          else
+            echo "✅ All dependencies are properly declared!" >> dependency-report.md
+          fi
+
+      - name: Upload Audit Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-audit-report
+          path: |
+            dependency-report.md
+            dependency-audit.txt
+          retention-days: 90
 
   # Example 3: Check specific environments (dev, prod, test)
   environment-specific-check:
@@ -100,101 +100,101 @@ jobs:
             requirements: "requirements/prod.txt"
             critical: true
           - name: "development"
-            requirements: "requirements/dev.txt" 
+            requirements: "requirements/dev.txt"
             critical: false
           - name: "testing"
             requirements: "requirements/test.txt"
             critical: false
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Check ${{ matrix.env.name }} Dependencies
-      uses: ./
-      with:
-        project-path: '.'
-        requirements-file: ${{ matrix.env.requirements }}
-        fail-on-missing: ${{ matrix.env.critical }}
-        ignore-dirs: 'tests,docs,examples,scripts'
-        
+      - uses: actions/checkout@v4
+
+      - name: Check ${{ matrix.env.name }} Dependencies
+        uses: ./
+        with:
+          project-path: "."
+          requirements-file: ${{ matrix.env.requirements }}
+          fail-on-missing: ${{ matrix.env.critical }}
+          ignore-dirs: "tests,docs,examples,scripts"
+
   # Example 4: Scheduled dependency maintenance
   dependency-maintenance:
     name: Weekly Dependency Maintenance
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule'
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Full Dependency Analysis
-      id: maintenance
-      uses: ./
-      with:
-        project-path: '.'
-        fail-on-missing: false
-        use-pipreqs: true
-        output-file: 'maintenance-report.txt'
-        
-    - name: Create Issue for Missing Dependencies
-      if: steps.maintenance.outputs.missing-count > 0
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const missingDeps = `${{ steps.maintenance.outputs.missing-dependencies }}`.split('\n').filter(dep => dep.trim() !== '');
-          const count = ${{ steps.maintenance.outputs.missing-count }};
-          
-          const title = `🔧 Weekly Dependency Maintenance: ${count} missing dependencies`;
-          const body = `## Weekly Dependency Check Results
-          
-          This is an automated weekly check of our Python dependencies.
-          
-          ### Missing Dependencies (${count})
-          
-          ${missingDeps.map(dep => `- [ ] \`${dep}\``).join('\n')}
-          
-          ### Action Items
-          
-          - [ ] Review each missing dependency
-          - [ ] Add legitimate dependencies to \`requirements.txt\`
-          - [ ] Remove unused imports if dependencies are not needed
-          - [ ] Update documentation if import patterns have changed
-          
-          ### How to Fix
-          
-          1. **To add all missing dependencies:**
-             \`\`\`bash
-             echo "${missingDeps.join('\\n')}" >> requirements.txt
-             pip install -r requirements.txt
-             \`\`\`
-          
-          2. **To add selectively:** Review each dependency and add only necessary ones
-          
-          3. **To ignore false positives:** Update the ignore patterns in the workflow
-          
-          ---
-          
-          *This issue was automatically generated by the weekly dependency check workflow.*
-          *Schedule: Every Monday at 2 AM UTC*
-          `;
-          
-          // Check if an open issue already exists
-          const existingIssues = await github.rest.issues.listForRepo({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            state: 'open',
-            labels: 'dependencies,maintenance'
-          });
-          
-          const hasOpenIssue = existingIssues.data.some(issue => 
-            issue.title.includes('Weekly Dependency Maintenance')
-          );
-          
-          if (!hasOpenIssue) {
-            await github.rest.issues.create({
+      - uses: actions/checkout@v4
+
+      - name: Full Dependency Analysis
+        id: maintenance
+        uses: ./
+        with:
+          project-path: "."
+          fail-on-missing: false
+          use-pipreqs: true
+          output-file: "maintenance-report.txt"
+
+      - name: Create Issue for Missing Dependencies
+        if: steps.maintenance.outputs.missing-count > 0
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const missingDeps = `${{ steps.maintenance.outputs.missing-dependencies }}`.split('\n').filter(dep => dep.trim() !== '');
+            const count = ${{ steps.maintenance.outputs.missing-count }};
+
+            const title = `🔧 Weekly Dependency Maintenance: ${count} missing dependencies`;
+            const body = `## Weekly Dependency Check Results
+
+            This is an automated weekly check of our Python dependencies.
+
+            ### Missing Dependencies (${count})
+
+            ${missingDeps.map(dep => `- [ ] \`${dep}\``).join('\n')}
+
+            ### Action Items
+
+            - [ ] Review each missing dependency
+            - [ ] Add legitimate dependencies to \`requirements.txt\`
+            - [ ] Remove unused imports if dependencies are not needed
+            - [ ] Update documentation if import patterns have changed
+
+            ### How to Fix
+
+            1. **To add all missing dependencies:**
+               \`\`\`bash
+               echo "${missingDeps.join('\\n')}" >> requirements.txt
+               pip install -r requirements.txt
+               \`\`\`
+
+            2. **To add selectively:** Review each dependency and add only necessary ones
+
+            3. **To ignore false positives:** Update the ignore patterns in the workflow
+
+            ---
+
+            *This issue was automatically generated by the weekly dependency check workflow.*
+            *Schedule: Every Monday at 2 AM UTC*
+            `;
+
+            // Check if an open issue already exists
+            const existingIssues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: title,
-              body: body,
-              labels: ['dependencies', 'maintenance', 'automated']
+              state: 'open',
+              labels: 'dependencies,maintenance'
             });
-          }
+
+            const hasOpenIssue = existingIssues.data.some(issue => 
+              issue.title.includes('Weekly Dependency Maintenance')
+            );
+
+            if (!hasOpenIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['dependencies', 'maintenance', 'automated']
+              });
+            }
