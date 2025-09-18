@@ -29,9 +29,21 @@ A versatile tool that automatically checks if all Python imports in your codebas
 ```yaml
 repos:
   - repo: https://github.com/trivedi-vatsal/PyImportSync
-    rev: v1.0.0
+    rev: master
     hooks:
       - id: check-python-dependencies
+```
+
+### Direct Installation (One-liner)
+
+Quick setup with automatic pre-commit configuration:
+
+```bash
+# Using Python (cross-platform)
+python -c "import urllib.request; exec(urllib.request.urlopen('https://raw.githubusercontent.com/trivedi-vatsal/PyImportSync/master/scripts/install_dep_check.py').read())"
+
+# Using curl (Unix/Linux/macOS)
+curl -sSL https://raw.githubusercontent.com/trivedi-vatsal/PyImportSync/master/scripts/install_dep_check.sh | bash
 ```
 
 ## Documentation

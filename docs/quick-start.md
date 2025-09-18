@@ -45,10 +45,10 @@ Run this one-liner in your project root:
 
 ```bash
 # Using curl
-curl -sSL https://raw.githubusercontent.com/trivedi-vatsal/PyImportSync/main/scripts/install_dep_check.sh | bash
+curl -sSL https://raw.githubusercontent.com/trivedi-vatsal/PyImportSync/master/scripts/install_dep_check.sh | bash
 
 # Using Python
-python -c "import urllib.request; exec(urllib.request.urlopen('https://raw.githubusercontent.com/trivedi-vatsal/PyImportSync/main/scripts/install_dep_check.py').read())"
+python -c "import urllib.request; exec(urllib.request.urlopen('https://raw.githubusercontent.com/trivedi-vatsal/PyImportSync/master/scripts/install_dep_check.py').read())"
 ```
 
 ### Option 2: Manual Setup
@@ -91,7 +91,12 @@ repos:
 You can also use PyImportSync directly from the command line:
 
 ```bash
-# Basic usage
+# Clone and run directly
+git clone https://github.com/trivedi-vatsal/PyImportSync.git
+cd PyImportSync
+python src/check_dependencies.py
+
+# Basic usage (if you already have the code)
 python src/check_dependencies.py
 
 # With verbose output
