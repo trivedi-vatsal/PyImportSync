@@ -1,0 +1,185 @@
+name: Test PyImportSync - Composite Approach
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  run-test-suite:
+    name: Run Complete Test Suite
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Test Dependencies
+        run: |
+          pip install pytest pytest-json-report
+
+      - name: Create Test Script
+        run: |
+          cat > test_pyimportsync.py << 'EOF'
+          import subprocess
+          import json
+          import sys
+          from pathlib import Path
+
+          def run_action_test(test_name, **kwargs):
+              """Run PyImportSync action with given parameters"""
+              print(f"\n🧪 Running test: {test_name}")
+              
+              # Convert kwargs to action inputs
+              cmd = ["python", "${{ github.workspace }}/src/check_dependencies.py"]
+              
+              # Map common parameters
+              if kwargs.get('project_root'):
+                  cmd.extend(["--project-root", kwargs['project_root']])
+              if kwargs.get('requirements_file'):
+                  cmd.extend(["--requirements-file", kwargs['requirements_file']])
+              if kwargs.get('ignore_dirs'):
+                  cmd.extend(["--ignore-dirs", kwargs['ignore_dirs']])
+              if kwargs.get('output_file'):
+                  cmd.extend(["--output", kwargs['output_file']])
+              if not kwargs.get('use_pipreqs', True):
+                  cmd.append("--no-pipreqs")
+              if not kwargs.get('respect_gitignore', True):
+                  cmd.append("--no-gitignore")
+              
+              try:
+                  result = subprocess.run(cmd, capture_output=True, text=True, 
+                                        cwd="${{ github.workspace }}")
+                  
+                  return {
+                      "test_name": test_name,
+                      "success": result.returncode == 0 or not kwargs.get('fail_on_missing', True),
+                      "returncode": result.returncode,
+                      "stdout": result.stdout,
+                      "stderr": result.stderr
+                  }
+              except Exception as e:
+                  return {
+                      "test_name": test_name,
+                      "success": False,
+                      "error": str(e)
+                  }
+
+          def main():
+              """Run all test scenarios"""
+              test_results = []
+              
+              # Define test scenarios
+              tests = [
+                  {
+                      "name": "All Flags Enabled",
+                      "project_root": ".",
+                      "requirements_file": "requirements.txt",
+                      "ignore_dirs": "tests,docs,examples,scripts",
+                      "fail_on_missing": True,
+                      "use_pipreqs": True,
+                      "respect_gitignore": True,
+                      "output_file": "all-flags-missing.txt"
+                  },
+                  {
+                      "name": "Permissive Mode",
+                      "project_root": ".",
+                      "requirements_file": "requirements.txt",
+                      "ignore_dirs": "tests,docs,examples",
+                      "fail_on_missing": False,
+                      "use_pipreqs": True,
+                      "respect_gitignore": True,
+                      "output_file": "permissive-missing.txt"
+                  },
+                  {
+                      "name": "Without Pipreqs",
+                      "project_root": ".",
+                      "requirements_file": "requirements.txt",
+                      "fail_on_missing": False,
+                      "use_pipreqs": False,
+                      "respect_gitignore": True,
+                      "output_file": "no-pipreqs-missing.txt"
+                  },
+                  {
+                      "name": "Ignore Gitignore",
+                      "project_root": ".",
+                      "requirements_file": "requirements.txt",
+                      "fail_on_missing": False,
+                      "use_pipreqs": True,
+                      "respect_gitignore": False,
+                      "output_file": "no-gitignore-missing.txt"
+                  },
+                  {
+                      "name": "Django Example",
+                      "project_root": "django_example",
+                      "requirements_file": "requirements.txt",
+                      "ignore_dirs": "__pycache__,migrations",
+                      "fail_on_missing": False,
+                      "use_pipreqs": True,
+                      "respect_gitignore": True,
+                      "output_file": "django-missing.txt"
+                  }
+              ]
+              
+              # Run all tests
+              for test_config in tests:
+                  result = run_action_test(**test_config)
+                  test_results.append(result)
+                  
+                  status = "✅ PASS" if result["success"] else "❌ FAIL"
+                  print(f"{status} {result['test_name']}")
+              
+              # Generate summary
+              passed = sum(1 for r in test_results if r["success"])
+              total = len(test_results)
+              
+              print(f"\n📊 Test Summary: {passed}/{total} tests passed")
+              
+              # Save detailed results
+              with open("test-results.json", "w") as f:
+                  json.dump(test_results, f, indent=2)
+              
+              # Generate GitHub summary
+              with open("test-summary.md", "w") as f:
+                  f.write("# PyImportSync Test Results\n\n")
+                  f.write(f"**Summary: {passed}/{total} tests passed**\n\n")
+                  f.write("| Test Name | Status | Details |\n")
+                  f.write("|-----------|--------|----------|\n")
+                  for result in test_results:
+                      status = "✅ PASS" if result["success"] else "❌ FAIL"
+                      details = f"Exit code: {result.get('returncode', 'N/A')}"
+                      f.write(f"| {result['test_name']} | {status} | {details} |\n")
+              
+              return 0 if passed == total else 1
+
+          if __name__ == "__main__":
+              sys.exit(main())
+          EOF
+
+      - name: Run Test Suite
+        run: python test_pyimportsync.py
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: complete-test-results
+          path: |
+            test-results.json
+            test-summary.md
+            *-missing.txt
+          retention-days: 30
+
+      - name: Add to GitHub Summary
+        if: always()
+        run: |
+          if [ -f test-summary.md ]; then
+            cat test-summary.md >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,89 @@
+name: Test PyImportSync - Reusable Approach
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-all-flags:
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      test-name: "All Flags Enabled"
+      project-path: "."
+      requirements-file: "requirements.txt"
+      ignore-dirs: "tests,docs,examples,scripts"
+      fail-on-missing: true
+      use-pipreqs: true
+      respect-gitignore: true
+
+  test-permissive:
+    uses: ./.github/workflows/reusable-test.yml
+    needs: test-all-flags
+    if: always()
+    with:
+      test-name: "Permissive Mode"
+      project-path: "."
+      requirements-file: "requirements.txt"
+      ignore-dirs: "tests,docs,examples"
+      fail-on-missing: false
+      use-pipreqs: true
+      respect-gitignore: true
+
+  test-no-pipreqs:
+    uses: ./.github/workflows/reusable-test.yml
+    needs: test-permissive
+    if: always()
+    with:
+      test-name: "Without Pipreqs"
+      project-path: "."
+      requirements-file: "requirements.txt"
+      fail-on-missing: false
+      use-pipreqs: false
+      respect-gitignore: true
+
+  test-no-gitignore:
+    uses: ./.github/workflows/reusable-test.yml
+    needs: test-no-pipreqs
+    if: always()
+    with:
+      test-name: "Ignore Gitignore"
+      project-path: "."
+      requirements-file: "requirements.txt"
+      fail-on-missing: false
+      use-pipreqs: true
+      respect-gitignore: false
+
+  test-django:
+    uses: ./.github/workflows/reusable-test.yml
+    needs: test-no-gitignore
+    if: always()
+    with:
+      test-name: "Django Example"
+      project-path: "django_example"
+      requirements-file: "requirements.txt"
+      ignore-dirs: "__pycache__,migrations"
+      fail-on-missing: false
+      use-pipreqs: true
+      respect-gitignore: true
+
+  create-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-all-flags, test-permissive, test-no-pipreqs, test-no-gitignore, test-django]
+    if: always()
+    
+    steps:
+      - name: Create Summary
+        run: |
+          echo "# PyImportSync Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | Status | Missing Deps |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|-------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| All Flags | ${{ needs.test-all-flags.outputs.status || '❌' }} | ${{ needs.test-all-flags.outputs.missing-count || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Permissive | ${{ needs.test-permissive.outputs.status || '❌' }} | ${{ needs.test-permissive.outputs.missing-count || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| No Pipreqs | ${{ needs.test-no-pipreqs.outputs.status || '❌' }} | ${{ needs.test-no-pipreqs.outputs.missing-count || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| No Gitignore | ${{ needs.test-no-gitignore.outputs.status || '❌' }} | ${{ needs.test-no-gitignore.outputs.missing-count || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Django | ${{ needs.test-django.outputs.status || '❌' }} | ${{ needs.test-django.outputs.missing-count || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY

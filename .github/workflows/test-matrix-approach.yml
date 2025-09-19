@@ -1,0 +1,191 @@
+name: Test PyImportSync - Matrix Approach
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-matrix:
+    name: Test ${{ matrix.test-name }}
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.allow-failure }}
+    strategy:
+      fail-fast: false  # Continue all tests even if some fail
+      matrix:
+        include:
+          # Basic functionality tests
+          - test-name: "All Flags Enabled"
+            project-path: "."
+            requirements-file: "requirements.txt"
+            ignore-dirs: "tests,docs,examples,scripts"
+            fail-on-missing: true
+            use-pipreqs: true
+            respect-gitignore: true
+            allow-failure: false
+            
+          - test-name: "Strict Mode"
+            project-path: "src"
+            requirements-file: "../requirements.txt"
+            ignore-dirs: "__pycache__,*.pyc"
+            fail-on-missing: true
+            use-pipreqs: true
+            respect-gitignore: true
+            allow-failure: true  # May fail if dependencies missing
+            
+          - test-name: "Permissive Mode"
+            project-path: "."
+            requirements-file: "requirements.txt"
+            ignore-dirs: "tests,docs,examples"
+            fail-on-missing: false
+            use-pipreqs: true
+            respect-gitignore: true
+            allow-failure: false
+            
+          - test-name: "Without Pipreqs"
+            project-path: "."
+            requirements-file: "requirements.txt"
+            ignore-dirs: ""
+            fail-on-missing: false
+            use-pipreqs: false
+            respect-gitignore: true
+            allow-failure: false
+            
+          - test-name: "Ignore Gitignore"
+            project-path: "."
+            requirements-file: "requirements.txt"
+            ignore-dirs: ""
+            fail-on-missing: false
+            use-pipreqs: true
+            respect-gitignore: false
+            allow-failure: false
+            
+          # Multiple requirements files
+          - test-name: "Main Requirements"
+            project-path: "."
+            requirements-file: "requirements.txt"
+            ignore-dirs: "tests,docs,examples,scripts"
+            fail-on-missing: false
+            use-pipreqs: true
+            respect-gitignore: true
+            allow-failure: false
+            
+          - test-name: "Django Requirements"
+            project-path: "."
+            requirements-file: "django_example/requirements.txt"
+            ignore-dirs: "tests,docs,examples,scripts"
+            fail-on-missing: false
+            use-pipreqs: true
+            respect-gitignore: true
+            allow-failure: false
+            
+          # Edge cases
+          - test-name: "Django Project"
+            project-path: "django_example"
+            requirements-file: "requirements.txt"
+            ignore-dirs: "__pycache__,migrations"
+            fail-on-missing: false
+            use-pipreqs: true
+            respect-gitignore: true
+            allow-failure: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Test ${{ matrix.test-name }}
+        id: test-action
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
+        with:
+          project-path: ${{ matrix.project-path }}
+          requirements-file: ${{ matrix.requirements-file }}
+          ignore-dirs: ${{ matrix.ignore-dirs }}
+          fail-on-missing: ${{ matrix.fail-on-missing }}
+          output-file: "${{ matrix.test-name }}-missing-deps.txt"
+          use-pipreqs: ${{ matrix.use-pipreqs }}
+          respect-gitignore: ${{ matrix.respect-gitignore }}
+
+      - name: Display Results
+        if: always()
+        run: |
+          echo "=== ${{ matrix.test-name }} Results ==="
+          echo "Missing Dependencies: ${{ steps.test-action.outputs.missing-dependencies }}"
+          echo "Missing Count: ${{ steps.test-action.outputs.missing-count }}"
+          echo "Status: ${{ steps.test-action.outputs.status }}"
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.test-name }}
+          path: "${{ matrix.test-name }}-missing-deps.txt"
+          retention-days: 7
+
+  test-edge-cases:
+    name: Test Edge Cases
+    runs-on: ubuntu-latest
+    needs: test-matrix
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test Non-existent Requirements File
+        continue-on-error: true
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
+        with:
+          project-path: "."
+          requirements-file: "non-existent.txt"
+          fail-on-missing: false
+
+      - name: Test Empty Project Directory
+        continue-on-error: true
+        run: |
+          mkdir empty-project
+          cd empty-project
+          echo "# Empty project" > README.md
+          
+      - name: Test Empty Project
+        continue-on-error: true
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
+        with:
+          project-path: "empty-project"
+          requirements-file: "../requirements.txt"
+          fail-on-missing: false
+
+  create-summary:
+    name: Create Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-matrix, test-edge-cases]
+    if: always()
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        
+      - name: Create comprehensive summary
+        run: |
+          echo "# PyImportSync Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Matrix Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Case | Status | Files |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          
+          for dir in test-results-*/; do
+            if [ -d "$dir" ]; then
+              test_name=$(basename "$dir" | sed 's/test-results-//')
+              if [ -f "$dir"/*.txt ]; then
+                echo "| $test_name | ✅ | $(ls "$dir"/*.txt | wc -l) |" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "| $test_name | ❌ | 0 |" >> $GITHUB_STEP_SUMMARY
+              fi
+            fi
+          done

@@ -1,0 +1,88 @@
+name: PyImportSync Test Job
+# Reusable workflow for testing PyImportSync
+
+on:
+  workflow_call:
+    inputs:
+      test-name:
+        required: true
+        type: string
+      project-path:
+        required: false
+        type: string
+        default: "."
+      requirements-file:
+        required: false
+        type: string
+        default: "requirements.txt"
+      ignore-dirs:
+        required: false
+        type: string
+        default: ""
+      fail-on-missing:
+        required: false
+        type: boolean
+        default: false
+      use-pipreqs:
+        required: false
+        type: boolean
+        default: true
+      respect-gitignore:
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      missing-dependencies:
+        description: "Missing dependencies found"
+        value: ${{ jobs.test.outputs.missing-dependencies }}
+      missing-count:
+        description: "Number of missing dependencies"
+        value: ${{ jobs.test.outputs.missing-count }}
+      status:
+        description: "Test status"
+        value: ${{ jobs.test.outputs.status }}
+
+jobs:
+  test:
+    name: ${{ inputs.test-name }}
+    runs-on: ubuntu-latest
+    outputs:
+      missing-dependencies: ${{ steps.test-action.outputs.missing-dependencies }}
+      missing-count: ${{ steps.test-action.outputs.missing-count }}
+      status: ${{ steps.test-action.outputs.status }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run PyImportSync Test
+        id: test-action
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
+        with:
+          project-path: ${{ inputs.project-path }}
+          requirements-file: ${{ inputs.requirements-file }}
+          ignore-dirs: ${{ inputs.ignore-dirs }}
+          fail-on-missing: ${{ inputs.fail-on-missing }}
+          output-file: "${{ inputs.test-name }}-results.txt"
+          use-pipreqs: ${{ inputs.use-pipreqs }}
+          respect-gitignore: ${{ inputs.respect-gitignore }}
+
+      - name: Display Results
+        run: |
+          echo "=== ${{ inputs.test-name }} Results ==="
+          echo "Missing Dependencies: ${{ steps.test-action.outputs.missing-dependencies }}"
+          echo "Missing Count: ${{ steps.test-action.outputs.missing-count }}"
+          echo "Status: ${{ steps.test-action.outputs.status }}"
+
+      - name: Upload Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.test-name }}-results
+          path: "${{ inputs.test-name }}-results.txt"
+          retention-days: 7
