@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check Python Dependencies
-        uses: trivedi-vatsal/PyImportSync@v1
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
         with:
           project-path: '.'
           fail-on-missing: true
@@ -50,12 +50,12 @@ jobs:
 
 ```yaml
 - name: Check Production Dependencies
-  uses: trivedi-vatsal/PyImportSync@v1
+  uses: trivedi-vatsal/PyImportSync@v1.0.0
   with:
     requirements-file: 'requirements/production.txt'
 
 - name: Check Development Dependencies
-  uses: trivedi-vatsal/PyImportSync@v1
+  uses: trivedi-vatsal/PyImportSync@v1.0.0
   with:
     requirements-file: 'requirements/development.txt'
     fail-on-missing: false
@@ -71,7 +71,7 @@ strategy:
 steps:
   - uses: actions/checkout@v4
   - name: Check Dependencies - ${{ matrix.requirements }}
-    uses: trivedi-vatsal/PyImportSync@v1
+    uses: trivedi-vatsal/PyImportSync@v1.0.0
     with:
       requirements-file: ${{ matrix.requirements }}
 ```
@@ -80,6 +80,6 @@ steps:
 
 ```yaml
 - name: Check Dependencies
-  uses: trivedi-vatsal/PyImportSync@v1
+  uses: trivedi-vatsal/PyImportSync@v1.0.0
   if: contains(github.event.head_commit.modified, 'requirements.txt')
 ```

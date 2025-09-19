@@ -19,7 +19,7 @@ jobs:
           python-version: "3.9"
 
       - name: Check Python Dependencies
-        uses: trivedi-vatsal/PyImportSync@v1
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
         with:
           project-path: "."
           requirements-file: "requirements.txt"

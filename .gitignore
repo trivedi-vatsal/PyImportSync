@@ -48,3 +48,4 @@ docs/_build/
 # Custom test directories
 test_ignored/
 temp_files/
+django_example/

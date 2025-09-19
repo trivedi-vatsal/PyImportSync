@@ -60,7 +60,7 @@ You can disable gitignore respect if needed:
 
 ```yaml
 - name: Check All Files
-  uses: trivedi-vatsal/PyImportSync@v1
+  uses: trivedi-vatsal/PyImportSync@v1.0.0
   with:
     respect-gitignore: false
 ```

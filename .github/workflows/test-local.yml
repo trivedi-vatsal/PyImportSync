@@ -1,4 +1,4 @@
-name: Test Fast Action
+name: PyImportSync CI - Local
 
 on:
   workflow_dispatch: # Allow manual trigger

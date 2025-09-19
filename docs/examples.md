@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check Python Dependencies
-        uses: trivedi-vatsal/PyImportSync@v1
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
         with:
           fail-on-missing: true
 ```

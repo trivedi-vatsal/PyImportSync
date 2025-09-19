@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check Dependencies - ${{ matrix.requirements-file }}
-        uses: trivedi-vatsal/PyImportSync@v1
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
         with:
           requirements-file: ${{ matrix.requirements-file }}
           fail-on-missing: false # Don't fail on dev/test deps
@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check API Dependencies
-        uses: trivedi-vatsal/PyImportSync@v1
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
         with:
           project-path: "src/api"
           requirements-file: "requirements/api.txt"
@@ -54,6 +54,6 @@ jobs:
 
       - name: Check Dependencies (only if requirements changed)
         if: steps.requirements-changed.outputs.changed == 'true'
-        uses: trivedi-vatsal/PyImportSync@v1
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
         with:
           fail-on-missing: true

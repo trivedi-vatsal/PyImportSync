@@ -10,7 +10,7 @@ Add this step to your GitHub workflow:
 
 ```yaml
 - name: Check Python Dependencies
-  uses: trivedi-vatsal/PyImportSync@v1
+  uses: trivedi-vatsal/PyImportSync@v1.0.0
   with:
     project-path: '.'
     fail-on-missing: true
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Check Python Dependencies
-        uses: trivedi-vatsal/PyImportSync@v1
+        uses: trivedi-vatsal/PyImportSync@v1.0.0
         with:
           project-path: '.'
           fail-on-missing: true

@@ -18,7 +18,7 @@ A versatile tool that automatically checks if all Python imports in your codebas
 
 ```yaml
 - name: Check Python Dependencies
-  uses: trivedi-vatsal/PyImportSync@v1
+  uses: trivedi-vatsal/PyImportSync@v1.0.0
   with:
     project-path: '.'
     fail-on-missing: true
